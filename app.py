@@ -96,6 +96,38 @@ def lista_libros():
 @app.route('/libro/<nombre_libro>')
 def ver_libro(nombre_libro):
     libro_data = biblia.get('biblia_data', {}).get(nombre_libro, None)
+    
+    # RUTA PARA VER UN LIBRO Y LISTAR SUS CAPÍTULOS (CONSOLIDADA)
+@app.route('/libro/<nombre_libro>')
+def ver_libro(nombre_libro):
+    # Obtener los datos del libro específico desde 'biblia_data'
+    libro_data = biblia.get('biblia_data', {}).get(nombre_libro, None)
+
+    # --- INICIO DE LÍNEAS DE DEPURACIÓN ---
+    print(f"DEBUG: Nombre del libro recibido en la URL: '{nombre_libro}'")
+    if 'biblia_data' in biblia:
+        nombres_de_libros_cargados = list(biblia['biblia_data'].keys())
+        print(f"DEBUG: Nombres de libros cargados en biblia.json: {nombres_de_libros_cargados}")
+        if nombre_libro in nombres_de_libros_cargados:
+            print(f"DEBUG: ¡El libro '{nombre_libro}' SÍ se encuentra entre los cargados!")
+        else:
+            print(f"DEBUG: El libro '{nombre_libro}' NO se encuentra entre los cargados.")
+    else:
+        print("DEBUG: 'biblia_data' no está presente en el diccionario 'biblia'.")
+    # --- FIN DE LÍNEAS DE DEPURACIÓN ---
+
+    if libro_data:
+        capitulos = [cap for cap in libro_data.keys() if cap != 'info']
+        capitulos_ordenados = sorted(capitulos, key=int)
+
+        resumen = resumenes_libros.get(nombre_libro, "Resumen no disponible.")
+
+        return render_template('ver_libro.html',
+                               libro_nombre=nombre_libro,
+                               capitulos=capitulos_ordenados,
+                               resumen=resumen)
+    else:
+        return render_template('error.html', mensaje=f"Lo siento, el libro '{nombre_libro}' no fue encontrado."), 404
 
     if libro_data:
         capitulos = [cap for cap in libro_data.keys() if cap != 'info']
