@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ libro_nombre }} {{ num_capitulo }} - Mi Biblia App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Mi Biblia App</h1>
+        <nav>
+    <ul>
+        <li><a href="/">Inicio</a></li>
+        <li><a href="/libros">Libros</a></li>
+        <li><a href="/favoritos">Favoritos</a></li>
+        <li>
+            <form action="/buscar" method="get" class="search-form-header">
+                <input type="search" name="q" placeholder="Buscar en la Biblia...">
+                <button type="submit">Buscar</button>
+            </form>
+        </li>
+    </ul>
+</nav>
+    </header>
+
+    <main>
+        <section class="contenido-capitulo">
+            <h2>{{ libro_nombre }} Capítulo {{ num_capitulo }}</h2>
+
+            <div class="navegacion-capitulos">
+                {% if capitulo_anterior %}
+                    <a href="/libro/{{ libro_nombre }}/capitulo/{{ capitulo_anterior }}" class="btn-navegacion anterior">Capítulo {{ capitulo_anterior }}</a>
+                {% else %}
+                    <span class="btn-navegacion deshabilitado">Anterior</span>
+                {% endif %}
+
+                <select onchange="window.location.href = this.value" class="selector-capitulo">
+                    {% for cap_total in total_capitulos %}
+                        <option value="/libro/{{ libro_nombre }}/capitulo/{{ cap_total }}" {% if cap_total == num_capitulo|string %}selected{% endif %}>
+                            Capítulo {{ cap_total }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                {% if capitulo_siguiente %}
+                    <a href="/libro/{{ libro_nombre }}/capitulo/{{ capitulo_siguiente }}" class="btn-navegacion siguiente">Capítulo {{ capitulo_siguiente }}</a>
+                {% else %}
+                    <span class="btn-navegacion deshabilitado">Siguiente</span>
+                {% endif %}
+            </div>
+
+          <div class="versiculos">
+                {% for num_versiculo, texto_versiculo in versiculos.items() %}
+        <p class="versiculo-item"
+           data-libro="{{ libro_nombre }}"
+           data-capitulo="{{ num_capitulo }}"
+           data-versiculo="{{ num_versiculo }}">
+            <strong>{{ num_versiculo }}.</strong> {{ texto_versiculo }}
+            <span class="favorite-button" role="button" aria-label="Añadir a favoritos">⭐</span>
+        </p>
+    {% endfor %}
+</div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Mi Biblia App. Todos los derechos reservados.</p>
+    </footer>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

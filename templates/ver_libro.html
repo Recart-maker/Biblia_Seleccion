@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ libro_nombre }} - Mi Biblia App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Mi Biblia App</h1>
+       <nav>
+    <ul>
+        <li><a href="/">Inicio</a></li>
+        <li><a href="/libros">Libros</a></li>
+        <li><a href="/favoritos">Favoritos</a></li>
+        <li>
+            <form action="/buscar" method="get" class="search-form-header">
+                <input type="search" name="q" placeholder="Buscar en la Biblia...">
+                <button type="submit">Buscar</button>
+            </form>
+        </li>
+    </ul>
+     </nav>
+    </header>
+
+    <main>
+        <section class="info-libro">
+            <h2>{{ libro_nombre }}</h2>
+            <p class="resumen-libro">{{ resumen }}</p>
+        </section>
+
+        <section class="lista-capitulos">
+            <h3>Capítulos:</h3>
+            <div class="grid-capitulos">
+                {% for capitulo_num in capitulos %}
+                    <a href="/libro/{{ libro_nombre }}/capitulo/{{ capitulo_num }}" class="enlace-capitulo">
+                        {{ capitulo_num }}
+                    </a>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Mi Biblia App. Todos los derechos reservados.</p>
+    </footer>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

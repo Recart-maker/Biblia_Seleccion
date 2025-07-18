@@ -1,0 +1,569 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #0d0d0d; /* Fondo oscuro */
+    color: #00ff00; /* Texto verde neón */
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+header {
+    background-color: #1a0033; /* Morado oscuro para el encabezado */
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 0 15px #ff00ff; /* Sombra rosa neón */
+    margin-bottom: 20px;
+}
+
+h1, h2, h3 {
+    color: #00ffff; /* Azul cian neón para títulos */
+    text-shadow: 0 0 8px #00ffff;
+}
+
+main {
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #1a1a1a; /* Fondo para el contenido */
+    border-radius: 10px;
+    box-shadow: 0 0 20px #00ff00; /* Sombra verde neón */
+}
+
+section {
+    margin-bottom: 30px;
+    padding: 20px;
+    border: 1px solid #ff00ff; /* Borde rosa neón */
+    border-radius: 8px;
+    background-color: #222222;
+    box-shadow: 0 0 10px #ff00ff;
+}
+
+.input-group, .buttons-group, .navigation-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
+    align-items: center;
+}
+
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #00ffff;
+    background-color: #333333;
+    color: #00ff00;
+    border-radius: 5px;
+    box-shadow: 0 0 5px #00ffff;
+    outline: none;
+    min-width: 150px; /* Asegura un ancho mínimo */
+}
+
+button {
+    background-color: #ff00ff; /* Rosa neón para botones */
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 0 8px #ff00ff;
+}
+
+button:hover {
+    background-color: #cc00cc; /* Rosa más oscuro al pasar el ratón */
+    box-shadow: 0 0 12px #ff00ff;
+}
+
+.resultado-block {
+    background-color: #0a0a0a;
+    border: 1px dashed #00ff00;
+    padding: 15px;
+    margin-top: 15px;
+    border-radius: 8px;
+    white-space: pre-wrap; /* Mantiene saltos de línea y espacios para versículos */
+    word-wrap: break-word; /* Rompe palabras largas */
+    color: #00ff00;
+    box-shadow: 0 0 10px #00ff00;
+}
+
+.versiculo-interactivo {
+    cursor: pointer;
+    padding: 5px;
+    margin-bottom: 5px;
+    border-radius: 3px;
+    transition: background-color 0.2s ease;
+}
+
+.versiculo-interactivo:hover {
+    background-color: rgba(0, 255, 255, 0.2); /* Azul cian transparente */
+}
+
+.resaltado {
+    background-color: rgba(255, 255, 0, 0.3); /* Amarillo transparente */
+    border-left: 3px solid #ffff00;
+}
+
+.info-count {
+    color: #00ffff;
+    font-size: 0.9em;
+    margin-left: 5px;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    margin-top: 30px;
+    background-color: #1a0033;
+    color: #00ff00;
+    box-shadow: 0 0 15px #ff00ff;
+}
+
+#resumenes {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.lista-resumenes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.libro-resumen {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.libro-resumen h3 {
+    margin-top: 0;
+    color: #333;
+    font-size: 1.2em;
+}
+
+.libro-resumen p {
+    font-size: 0.9em;
+    color: #666;
+    line-height: 1.5;
+}
+
+/* static/css/style.css */
+
+/* Estilos para la sección de lista de libros */
+#lista-libros {
+    padding: 20px;
+    margin-top: 20px;
+    
+
+}
+
+.grid-libros {
+    display: grid;
+    /* Ajusta las columnas para que se adapten al ancho, mínimo 250px */
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px; /* Espacio entre las tarjetas de libros */
+    padding: 10px;
+}
+
+.tarjeta-libro {
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    transition: transform 0.2s ease-in-out;
+}
+
+.tarjeta-libro:hover {
+    transform: translateY(-5px); /* Pequeño efecto al pasar el ratón */
+}
+
+.tarjeta-libro h3 {
+    color: #4a4a4a;
+    margin-top: 0;
+    font-size: 1.3em;
+}
+
+.tarjeta-libro p {
+    font-size: 0.9em;
+    color: #666;
+    line-height: 1.6;
+    height: 120px; /* Altura fija para el resumen */
+    overflow: hidden; /* Oculta el texto que se desborda */
+    text-overflow: ellipsis; /* Añade puntos suspensivos al final */
+    display: -webkit-box;
+    -webkit-line-clamp: 5; /* Limita a 5 líneas */
+    -webkit-box-orient: vertical;
+}
+
+/* static/css/style.css */
+
+/* ... (tus estilos existentes para index.html y libros.html) ... */
+
+/* Estilos para la sección de información del libro (ver_libro.html) */
+.info-libro {
+    background-color: #e6f7ff; /* Un azul claro */
+    border-left: 5px solid #007bff;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+
+.info-libro h2 {
+    color: #0056b3;
+    margin-top: 0;
+}
+
+.resumen-libro {
+    font-style: italic;
+    color: #333;
+}
+
+/* Estilos para la lista de capítulos (ver_libro.html) */
+.lista-capitulos h3 {
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.grid-capitulos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); /* Botones más pequeños */
+    gap: 10px;
+    padding: 10px;
+}
+
+.enlace-capitulo {
+    display: block;
+    background-color: #4CAF50; /* Verde */
+    color: white;
+    padding: 10px 5px;
+    border-radius: 5px;
+    text-align: center;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+}
+
+.enlace-capitulo:hover {
+    background-color: #45a049;
+}
+
+
+/* Estilos para la sección de contenido del capítulo (ver_capitulo.html) */
+.contenido-capitulo {
+    padding: 20px;
+    background-color: #fdfdfd;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.contenido-capitulo h2 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 25px;
+}
+
+.versiculos p {
+    margin-bottom: 15px;
+    line-height: 1.8;
+    font-size: 1.05em;
+    color: #34495e;
+}
+
+.versiculos p strong {
+    color: #2980b9; /* Azul más oscuro para el número de versículo */
+}
+
+/* Estilos para la navegación de capítulos (ver_capitulo.html) */
+.navegacion-capitulos {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    background-color: #ecf0f1;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.btn-navegacion {
+    background-color: #3498db; /* Azul */
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+    white-space: nowrap; /* Evita que el texto se rompa */
+}
+
+.btn-navegacion:hover {
+    background-color: #2980b9;
+}
+
+.btn-navegacion.deshabilitado {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.selector-capitulo {
+    padding: 8px 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 1em;
+    cursor: pointer;
+    flex-grow: 1; /* Permite que ocupe el espacio disponible */
+    margin: 0 10px; /* Margen a los lados */
+}
+
+/* static/css/style.css */
+
+/* ... (tus estilos existentes) ... */
+
+.btn-ver-libro {
+    display: inline-block; /* Ocupa solo el espacio necesario */
+    background-color: #007bff; /* Un azul agradable */
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    margin-top: 10px; /* Espacio encima del botón */
+    transition: background-color 0.2s ease;
+}
+
+.btn-ver-libro:hover {
+    background-color: #0056b3; /* Un azul más oscuro al pasar el ratón */
+}
+
+/* static/css/style.css */
+
+/* ... (tus estilos existentes) ... */
+
+/* Estilos para el formulario de búsqueda en el header */
+.search-form-header {
+    display: flex; /* Para alinear el input y el botón */
+    align-items: center;
+    gap: 5px; /* Espacio entre el input y el botón */
+}
+
+.search-form-header input[type="search"] {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9em;
+    flex-grow: 1; /* Permite que el input ocupe el espacio disponible */
+    min-width: 120px; /* Ancho mínimo para el input */
+}
+
+.search-form-header button[type="submit"] {
+    background-color: #3498db; /* Azul */
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.2s ease;
+}
+
+.search-form-header button[type="submit"]:hover {
+    background-color: #2980b9; /* Azul más oscuro al pasar el ratón */
+}
+
+
+/* Estilos para la sección de resultados de búsqueda */
+#resultados-busqueda {
+    padding: 20px;
+    margin-top: 20px;
+}
+
+#resultados-busqueda h2 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+#resultados-busqueda h2 span {
+    color: #007bff; /* Color para el término buscado */
+}
+
+.lista-resultados {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    padding: 20px;
+}
+
+.resultado-item {
+    border-bottom: 1px solid #eee;
+    padding: 15px 0;
+}
+
+.resultado-item:last-child {
+    border-bottom: none; /* No hay borde en el último elemento */
+}
+
+.resultado-item h3 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    font-size: 1.1em;
+}
+
+.resultado-item h3 a {
+    color: #3498db; /* Azul para el enlace al versículo */
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.resultado-item h3 a:hover {
+    text-decoration: underline;
+}
+
+.resultado-item p {
+    font-size: 0.95em;
+    line-height: 1.6;
+    color: #555;
+}
+
+/* Estilo para resaltar el texto buscado */
+.resultado-item p strong {
+    background-color: #ffff00; /* Fondo amarillo para el resaltado */
+    padding: 1px 3px;
+    border-radius: 3px;
+}
+
+/* static/css/style.css */
+
+/* ... (tus estilos existentes) ... */
+
+.versiculo-item {
+    position: relative; /* Para posicionar el botón de favorito */
+    padding-right: 35px; /* Espacio para el botón de favorito */
+}
+
+.favorite-button {
+    position: absolute;
+    top: 5px; /* Ajusta la posición vertical */
+    right: 5px; /* Ajusta la posición horizontal */
+    font-size: 1.5em; /* Tamaño del icono */
+    cursor: pointer;
+    color: #ccc; /* Color por defecto (gris, no favorito) */
+    transition: color 0.2s ease, transform 0.2s ease;
+    background: none;
+    border: none;
+    padding: 0;
+    line-height: 1; /* Para evitar problemas de alineación */
+}
+
+.favorite-button:hover {
+    transform: scale(1.1); /* Efecto de zoom al pasar el ratón */
+}
+
+.favorite-button.is-favorite {
+    color: #ff4d4d; /* Color rojo para favorito */
+}
+
+/* static/css/style.css */
+
+/* ... (tus estilos existentes) ... */
+
+/* Estilos para la página de favoritos */
+#favoritos-section {
+    padding: 20px;
+    margin-top: 20px;
+}
+
+#favoritos-section h2 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 25px;
+}
+
+.lista-favoritos {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    padding: 20px;
+    min-height: 100px; /* Para que no se vea vacía sin contenido */
+    position: relative; /* Para el mensaje de no favoritos */
+}
+
+.lista-favoritos p#no-favoritos-message {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 20px;
+}
+
+.favorite-verse-item {
+    border-bottom: 1px dashed #eee; /* Línea discontinua */
+    padding: 10px 0;
+    font-size: 1.05em;
+    line-height: 1.6;
+    color: #34495e;
+    position: relative; /* Para posicionar el botón de eliminar */
+}
+
+.favorite-verse-item:last-child {
+    border-bottom: none;
+}
+
+.favorite-verse-item a {
+    color: #3498db; /* Azul para el enlace */
+    text-decoration: none;
+    font-weight: normal;
+}
+
+.favorite-verse-item a:hover {
+    text-decoration: underline;
+}
+
+.favorite-verse-item strong {
+    color: #2980b9; /* Color para la referencia */
+}
+
+.delete-favorite-button {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2em;
+    cursor: pointer;
+    color: #ff6347; /* Naranja rojizo para eliminar */
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+    padding: 5px; /* Para hacer el área de click más grande */
+}
+
+.delete-favorite-button:hover {
+    opacity: 1;
+}
+
+.clear-button {
+    display: block; /* Ocupa todo el ancho */
+    margin: 20px auto; /* Centrar y margen */
+    background-color: #e74c3c; /* Rojo para limpiar */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.2s ease;
+}
+
+.clear-button:hover {
+    background-color: #c0392b;
+}
+
+/* Puedes añadir más estilos si es necesario */
