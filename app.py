@@ -1,129 +1,64 @@
 import json
 from flask import Flask, render_template, request, jsonify
 import random
-import unicodedata # <--- ¡Añade esta línea!
-import os # <-- ¡Añade esta línea!
-import re # Asegúrate de que esta también esté si la usas para la búsqueda
+import unicodedata
+import os
+import re
 
+# --- 1. Inicialización de la Aplicación Flask (¡SOLO UNA VEZ!) ---
 app = Flask(__name__)
 
-# app.py
+# --- 2. Configuraciones (opcional, pero buena práctica) ---
+# app.config['SECRET_KEY'] = 'tu_clave_secreta_aqui' # Descomenta y cambia por una clave fuerte si usas sesiones o formularios
 
-# ... (tus importaciones existentes, incluyendo 'os', 'json')
-
-app = Flask(__name__)
-# ... (app.config['SECRET_KEY'], BASE_DIR, biblia, resumenes_libros loading)
-
-# ... (otras rutas existentes como '/', '/libros', '/buscar', '/favoritos')
-
-# **NUEVA RUTA: Para ver un libro y listar sus capítulos**
-@app.route('/libro/<libro_nombre>')
-def ver_libro(libro_nombre):
-    # Flask decodifica automáticamente los caracteres especiales como %20 (espacios)
-    # Por seguridad, puedes asegurarte de que el nombre del libro en la URL coincida con tus claves JSON.
-    # Una opción simple para URL con números es reemplazar %20 con espacio, si fuera necesario,
-    # aunque Flask suele manejarlo. Para este caso, asumiremos que Flask lo pasa bien.
-
-    if libro_nombre not in biblia:
-        # Si el libro no se encuentra en la Biblia cargada, muestra un mensaje de error.
-        # Es importante que el nombre en tu biblia.json sea EXACTO (ej. "1 Corintios").
-        return render_template('error.html', mensaje=f"Lo siento, el libro '{libro_nombre}' no fue encontrado."), 404
-
-    # Obtener el número de capítulos de ese libro
-    num_capitulos = len(biblia[libro_nombre])
-
-    # Crear una lista de números de capítulo para pasar a la plantilla
-    capitulos = range(1, num_capitulos + 1)
-
-    # Renderizar la plantilla 'ver_libro.html' para mostrar los capítulos
-    # Esta plantilla debe tener un bucle para mostrar enlaces a cada capítulo
-    return render_template('ver_libro.html',
-                           libro_nombre=libro_nombre,
-                           capitulos=capitulos)
-
-
-# **TU RUTA EXISTENTE: Para ver un capítulo específico de un libro**
-@app.route('/libro/<libro_nombre>/capitulo/<int:num_capitulo>')
-def ver_capitulo(libro_nombre, num_capitulo):
-    # Asegúrate de que este libro_nombre sea el mismo que se pasa a ver_libro
-    # Y que el num_capitulo sea válido.
-    
-    if libro_nombre not in biblia:
-        return render_template('error.html', mensaje=f"Libro '{libro_nombre}' no encontrado."), 404
-
-    # Validar que el número de capítulo esté dentro del rango existente para el libro
-    if num_capitulo <= 0 or num_capitulo > len(biblia[libro_nombre]):
-        return render_template('error.html', mensaje="Capítulo no válido o inexistente para este libro."), 404
-
-    # Obtener los versículos del capítulo
-    versiculos = biblia[libro_nombre][str(num_capitulo)]
-    
-    # Calcular el total de capítulos para la navegación (si tienes botones de siguiente/anterior capítulo)
-    total_capitulos = len(biblia[libro_nombre])
-
-    return render_template('ver_capitulo.html',
-                           libro_nombre=libro_nombre,
-                           num_capitulo=num_capitulo,
-                           versiculos=versiculos,
-                           total_capitulos=total_capitulos)
-
-
-
-# Ruta base para los archivos de datos
+# --- 3. Definición de la ruta base para los archivos de datos ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Cargar la Biblia
-with open('biblia.json', 'r', encoding='utf-8') as f:
-    biblia = json.load(f)
-
-# Cargar los resúmenes
-with open('resumen_libros.json', 'r', encoding='utf-8') as f:
-    resumenes_libros = json.load(f)
-
-# Función para normalizar texto (quitar acentos y convertir a minúsculas)
-def normalize_text(text):
-    if not isinstance(text, str): # Asegurarse de que sea una cadena
-        return ""
-    # Convertir a minúsculas
-    text = text.lower()
-    # Normalizar para quitar acentos
-    text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8')
-    # Puedes añadir más limpieza si es necesario (ej. quitar puntuación, espacios extra)
-    # text = re.sub(r'[^\w\s]', '', text) # Para quitar puntuación (requiere import re)
-    return text
-
-app = Flask(__name__)
-
+# --- 4. Carga de los archivos JSON (¡SOLO UNA VEZ!) ---
 # Cargar la Biblia completa con versículos
 try:
-    with open('biblia.json', 'r', encoding='utf-8') as f:
+    with open(os.path.join(BASE_DIR, 'biblia.json'), 'r', encoding='utf-8') as f:
         biblia = json.load(f)
-        print(biblia.keys())
+    print("biblia.json cargado exitosamente.")
+    if 'biblia_data' in biblia:
+        print(f"Libros encontrados en biblia.json: {list(biblia['biblia_data'].keys())}")
+    else:
+        print("Advertencia: 'biblia_data' no encontrada como clave principal en biblia.json.")
 except FileNotFoundError:
-    print("Error: 'biblia.json' no encontrado. Asegúrate de que esté en la misma carpeta que 'app.py'.")
-    biblia = {} # Cargar un diccionario vacío para evitar errores en la app
+    print(f"Error: 'biblia.json' no encontrado en '{BASE_DIR}'. Asegúrate de que esté en la misma carpeta que 'app.py'.")
+    biblia = {} # Cargar un diccionario vacío para evitar errores posteriores
 except json.JSONDecodeError:
     print("Error: 'biblia.json' contiene un JSON inválido. Revisa su formato.")
     biblia = {}
 
 # Cargar los resúmenes de los libros
 try:
-    with open('resumen_libros.json', 'r', encoding='utf-8') as f:
+    with open(os.path.join(BASE_DIR, 'resumen_libros.json'), 'r', encoding='utf-8') as f:
         resumenes_libros = json.load(f)
+    print("resumen_libros.json cargado exitosamente.")
 except FileNotFoundError:
-    print("Error: 'resumen_libros.json' no encontrado. Asegúrate de que esté en la misma carpeta que 'app.py'.")
+    print(f"Error: 'resumen_libros.json' no encontrado en '{BASE_DIR}'. Asegúrate de que esté en la misma carpeta que 'app.py'.")
     resumenes_libros = {}
 except json.JSONDecodeError:
     print("Error: 'resumen_libros.json' contiene un JSON inválido. Revisa su formato.")
     resumenes_libros = {}
 
+# --- 5. Función para normalizar texto (utilizada en la búsqueda) ---
+def normalize_text(text):
+    if not isinstance(text, str):
+        return ""
+    text = text.lower()
+    # Normalizar para quitar acentos y otros caracteres diacríticos
+    text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8')
+    # Puedes añadir más limpieza, por ejemplo, quitar puntuación si no la quieres en la búsqueda
+    # text = re.sub(r'[^\w\s]', '', text)
+    return text
 
-
+# --- 6. Definición de todas las Rutas de la Aplicación ---
 
 @app.route('/')
 def index():
-    # --- Lógica para seleccionar un versículo aleatorio ---
-    versiculo_aleatorio_texto = "¡Bienvenido a tu Biblia App! Navega para empezar." # Versículo por defecto
+    versiculo_aleatorio_texto = "¡Bienvenido a tu Biblia App! Navega para empezar."
     versiculo_aleatorio_referencia = ""
 
     biblia_data_contenido = biblia.get('biblia_data', {})
@@ -131,52 +66,41 @@ def index():
     if biblia_data_contenido:
         libros_disponibles = [nombre for nombre in biblia_data_contenido.keys() if nombre != 'info']
         if libros_disponibles:
-            # Seleccionar un libro al azar
             libro_elegido_nombre = random.choice(libros_disponibles)
             libro_elegido_data = biblia_data_contenido.get(libro_elegido_nombre, {})
 
             capitulos_disponibles = [cap for cap in libro_elegido_data.keys() if cap != 'info']
             if capitulos_disponibles:
-                # Seleccionar un capítulo al azar
                 capitulo_elegido_num = random.choice(capitulos_disponibles)
                 versiculos_capitulo = libro_elegido_data.get(capitulo_elegido_num, {})
 
                 versiculos_nums = [v_num for v_num in versiculos_capitulo.keys()]
                 if versiculos_nums:
-                    # Seleccionar un versículo al azar
                     versiculo_elegido_num = random.choice(versiculos_nums)
                     versiculo_aleatorio_texto = versiculos_capitulo.get(versiculo_elegido_num)
                     versiculo_aleatorio_referencia = f"{libro_elegido_nombre} {capitulo_elegido_num}:{versiculo_elegido_num}"
-    # --- FIN Lógica para versículo aleatorio ---
 
     return render_template('index.html',
                            portada_versiculo=versiculo_aleatorio_texto,
-                           portada_referencia=versiculo_aleatorio_referencia, # <--- Pasa también la referencia
-                           libros=biblia_data_contenido.keys(), # Puedes seguir usando biblia.keys() para la lista de nombres
+                           portada_referencia=versiculo_aleatorio_referencia,
+                           libros=biblia_data_contenido.keys(),
                            resumenes_libros=resumenes_libros)
 
-
-    
 @app.route('/libros')
 def lista_libros():
-    # Acceder a los nombres de los libros desde 'biblia_data'
     nombres_libros = biblia.get('biblia_data', {}).keys()
-    
-    # Ordenar los libros alfabéticamente si lo deseas
     libros_ordenados = sorted(nombres_libros)
     return render_template('libros.html', libros=libros_ordenados, resumenes_libros=resumenes_libros)
 
+# RUTA PARA VER UN LIBRO Y LISTAR SUS CAPÍTULOS (CONSOLIDADA)
 @app.route('/libro/<nombre_libro>')
 def ver_libro(nombre_libro):
-    # Obtener los datos del libro específico desde 'biblia_data'
     libro_data = biblia.get('biblia_data', {}).get(nombre_libro, None)
 
     if libro_data:
-        # Los capítulos son las claves del diccionario de libro_data (excluyendo 'info')
         capitulos = [cap for cap in libro_data.keys() if cap != 'info']
-        capitulos_ordenados = sorted(capitulos, key=int) # Ordenar capítulos numéricamente
+        capitulos_ordenados = sorted(capitulos, key=int)
 
-        # Obtener el resumen del libro para mostrarlo también
         resumen = resumenes_libros.get(nombre_libro, "Resumen no disponible.")
 
         return render_template('ver_libro.html',
@@ -184,31 +108,28 @@ def ver_libro(nombre_libro):
                                capitulos=capitulos_ordenados,
                                resumen=resumen)
     else:
-        return "Libro no encontrado.", 404 # Si el libro no existe, devuelve un error 404
-    
+        # Devuelve un error 404 si el libro no existe en biblia_data
+        return render_template('error.html', mensaje=f"Lo siento, el libro '{nombre_libro}' no fue encontrado."), 404
+
+# RUTA PARA VER UN CAPÍTULO ESPECÍFICO DE UN LIBRO
 @app.route('/libro/<nombre_libro>/capitulo/<int:num_capitulo>')
 def ver_capitulo(nombre_libro, num_capitulo):
-    # Obtener los datos del libro específico
     libro_data = biblia.get('biblia_data', {}).get(nombre_libro, None)
 
     if libro_data:
-        # Obtener los versículos del capítulo específico
-        # Convertimos num_capitulo a string porque las claves en JSON son strings
         versiculos = libro_data.get(str(num_capitulo), None)
 
         if versiculos:
-            # Obtener el número total de capítulos para la navegación
             todos_los_capitulos = [cap for cap in libro_data.keys() if cap != 'info']
             total_capitulos = sorted(todos_los_capitulos, key=int)
 
-            # Encontrar el índice del capítulo actual para calcular anterior/siguiente
             try:
                 indice_actual = total_capitulos.index(str(num_capitulo))
                 capitulo_anterior = total_capitulos[indice_actual - 1] if indice_actual > 0 else None
                 capitulo_siguiente = total_capitulos[indice_actual + 1] if indice_actual < len(total_capitulos) - 1 else None
             except ValueError:
                 capitulo_anterior = None
-                capitulo_siguiente = None # El capítulo actual no se encontró en la lista ordenada, lo cual es inusual
+                capitulo_siguiente = None
 
             return render_template('ver_capitulo.html',
                                    libro_nombre=nombre_libro,
@@ -216,14 +137,11 @@ def ver_capitulo(nombre_libro, num_capitulo):
                                    versiculos=versiculos,
                                    capitulo_anterior=capitulo_anterior,
                                    capitulo_siguiente=capitulo_siguiente,
-                                   total_capitulos=total_capitulos) # Pasar la lista completa de capítulos
-
+                                   total_capitulos=total_capitulos)
         else:
-            return "Capítulo no encontrado.", 404
+            return render_template('error.html', mensaje="Capítulo no encontrado."), 404
     else:
-        return "Libro no encontrado.", 404
-    
-# ... (tu código anterior)
+        return render_template('error.html', mensaje="Libro no encontrado."), 404
 
 @app.route('/buscar', methods=['GET'])
 def buscar():
@@ -231,12 +149,8 @@ def buscar():
     resultados = []
 
     if query:
-        # Normalizar el término de búsqueda
         query_normalized = normalize_text(query)
-
-        # --- DEBUG: Puedes imprimir esto para ver qué está buscando ---
         print(f"Buscando el término normalizado: '{query_normalized}'")
-        # --- FIN DEBUG ---
 
         for libro_nombre, libro_contenido in biblia.get('biblia_data', {}).items():
             if libro_nombre == 'info':
@@ -247,7 +161,6 @@ def buscar():
                     continue
 
                 for num_versiculo, texto_versiculo in capitulo_versiculos.items():
-                    # Normalizar el texto del versículo para la comparación
                     texto_normalized = normalize_text(texto_versiculo)
 
                     if query_normalized in texto_normalized:
@@ -255,27 +168,20 @@ def buscar():
                             'libro': libro_nombre,
                             'capitulo': num_capitulo,
                             'versiculo_num': num_versiculo,
-                            'texto': texto_versiculo # Guardar el texto original para mostrar
+                            'texto': texto_versiculo
                         })
-
-        # --- DEBUG: Puedes imprimir esto para ver qué resultados se encuentran ---
         print(f"Se encontraron {len(resultados)} resultados.")
-        # --- FIN DEBUG ---
 
     resultados_ordenados = sorted(resultados, key=lambda x: (x['libro'], int(x['capitulo']), int(x['versiculo_num'])))
 
     return render_template('resultados_busqueda.html',
-                           query=query, # Pasar el query original para mostrar
+                           query=query,
                            resultados=resultados_ordenados)
-    
-
 
 @app.route('/favoritos')
 def mostrar_favoritos():
     return render_template('favoritos.html')
 
-
-
-
+# --- 7. Ejecutar la Aplicación ---
 if __name__ == '__main__':
- app.run(debug=True)
+    app.run(debug=True)
