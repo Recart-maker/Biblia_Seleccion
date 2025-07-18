@@ -2,6 +2,21 @@ import json
 from flask import Flask, render_template, request, jsonify
 import random
 import unicodedata # <--- ¡Añade esta línea!
+import os # <-- ¡Añade esta línea!
+import re # Asegúrate de que esta también esté si la usas para la búsqueda
+
+app = Flask(__name__)
+
+# Ruta base para los archivos de datos
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Cargar la Biblia
+with open('biblia.json', 'r', encoding='utf-8') as f:
+    biblia = json.load(f)
+
+# Cargar los resúmenes
+with open('resumen_libros.json', 'r', encoding='utf-8') as f:
+    resumenes_libros = json.load(f)
 
 # Función para normalizar texto (quitar acentos y convertir a minúsculas)
 def normalize_text(text):
