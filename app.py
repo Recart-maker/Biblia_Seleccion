@@ -4,6 +4,7 @@ import random
 import unicodedata
 import os
 import re
+from urllib.parse import unquote
 
 # --- 1. Inicialización de la Aplicación Flask (¡SOLO UNA VEZ!) ---
 app = Flask(__name__)
@@ -97,18 +98,25 @@ def lista_libros():
     # RUTA PARA VER UN LIBRO Y LISTAR SUS CAPÍTULOS (CONSOLIDADA)
 @app.route('/libro/<nombre_libro>')
 def ver_libro(nombre_libro):
+    # *** AÑADE ESTA LÍNEA PARA DECODIFICAR EL NOMBRE DEL LIBRO ***
+    nombre_libro_decodificado = unquote(nombre_libro)
+
     # Obtener los datos del libro específico desde 'biblia_data'
-    libro_data = biblia.get('biblia_data', {}).get(nombre_libro, None)
+    # *** USA EL NOMBRE DECODIFICADO AQUÍ ***
+    libro_data = biblia.get('biblia_data', {}).get(nombre_libro_decodificado, None)
 
     # --- INICIO DE LÍNEAS DE DEPURACIÓN ---
-    print(f"DEBUG: Nombre del libro recibido en la URL: '{nombre_libro}'")
+    # *** ACTUALIZA TUS PRINTS PARA MOSTRAR EL NOMBRE DECODIFICADO ***
+    print(f"DEBUG: Nombre del libro recibido en la URL (original): '{nombre_libro}'")
+    print(f"DEBUG: Nombre del libro decodificado: '{nombre_libro_decodificado}'")
     if 'biblia_data' in biblia:
         nombres_de_libros_cargados = list(biblia['biblia_data'].keys())
         print(f"DEBUG: Nombres de libros cargados en biblia.json: {nombres_de_libros_cargados}")
-        if nombre_libro in nombres_de_libros_cargados:
-            print(f"DEBUG: ¡El libro '{nombre_libro}' SÍ se encuentra entre los cargados!")
+        # *** USA EL NOMBRE DECODIFICADO PARA LA COMPARACIÓN ***
+        if nombre_libro_decodificado in nombres_de_libros_cargados:
+            print(f"DEBUG: ¡El libro '{nombre_libro_decodificado}' SÍ se encuentra entre los cargados!")
         else:
-            print(f"DEBUG: El libro '{nombre_libro}' NO se encuentra entre los cargados.")
+            print(f"DEBUG: El libro '{nombre_libro_decodificado}' NO se encuentra entre los cargados.")
     else:
         print("DEBUG: 'biblia_data' no está presente en el diccionario 'biblia'.")
     # --- FIN DE LÍNEAS DE DEPURACIÓN ---
@@ -117,60 +125,15 @@ def ver_libro(nombre_libro):
         capitulos = [cap for cap in libro_data.keys() if cap != 'info']
         capitulos_ordenados = sorted(capitulos, key=int)
 
-        resumen = resumenes_libros.get(nombre_libro, "Resumen no disponible.")
+        resumen = resumenes_libros.get(nombre_libro_decodificado, "Resumen no disponible.") # *** USA EL NOMBRE DECODIFICADO AQUÍ ***
 
         return render_template('ver_libro.html',
-                               libro_nombre=nombre_libro,
-                               capitulos=capitulos_ordenados,
-                               resumen=resumen)
-    else:
-        return render_template('error.html', mensaje=f"Lo siento, el libro '{nombre_libro}' no fue encontrado."), 404
-
-    if libro_data:
-        capitulos = [cap for cap in libro_data.keys() if cap != 'info']
-        capitulos_ordenados = sorted(capitulos, key=int)
-
-        resumen = resumenes_libros.get(nombre_libro, "Resumen no disponible.")
-
-        return render_template('ver_libro.html',
-                               libro_nombre=nombre_libro,
+                               libro_nombre=nombre_libro_decodificado, # *** PASA EL NOMBRE DECODIFICADO A LA PLANTILLA ***
                                capitulos=capitulos_ordenados,
                                resumen=resumen)
     else:
         # Devuelve un error 404 si el libro no existe en biblia_data
-        return render_template('error.html', mensaje=f"Lo siento, el libro '{nombre_libro}' no fue encontrado."), 404
-
-# RUTA PARA VER UN CAPÍTULO ESPECÍFICO DE UN LIBRO
-@app.route('/libro/<nombre_libro>/capitulo/<int:num_capitulo>')
-def ver_capitulo(nombre_libro, num_capitulo):
-    libro_data = biblia.get('biblia_data', {}).get(nombre_libro, None)
-
-    if libro_data:
-        versiculos = libro_data.get(str(num_capitulo), None)
-
-        if versiculos:
-            todos_los_capitulos = [cap for cap in libro_data.keys() if cap != 'info']
-            total_capitulos = sorted(todos_los_capitulos, key=int)
-
-            try:
-                indice_actual = total_capitulos.index(str(num_capitulo))
-                capitulo_anterior = total_capitulos[indice_actual - 1] if indice_actual > 0 else None
-                capitulo_siguiente = total_capitulos[indice_actual + 1] if indice_actual < len(total_capitulos) - 1 else None
-            except ValueError:
-                capitulo_anterior = None
-                capitulo_siguiente = None
-
-            return render_template('ver_capitulo.html',
-                                   libro_nombre=nombre_libro,
-                                   num_capitulo=num_capitulo,
-                                   versiculos=versiculos,
-                                   capitulo_anterior=capitulo_anterior,
-                                   capitulo_siguiente=capitulo_siguiente,
-                                   total_capitulos=total_capitulos)
-        else:
-            return render_template('error.html', mensaje="Capítulo no encontrado."), 404
-    else:
-        return render_template('error.html', mensaje="Libro no encontrado."), 404
+        return render_template('error.html', mensaje=f"Lo siento, el libro '{nombre_libro_decodificado}' no fue encontrado."), 404 # *** USA EL NOMBRE DECODIFICADO AQUÍ ***
 
 @app.route('/buscar', methods=['GET'])
 def buscar():
