@@ -93,10 +93,49 @@ def lista_libros():
     libros_ordenados = sorted(nombres_libros)
     return render_template('libros.html', libros=libros_ordenados, resumenes_libros=resumenes_libros)
 
-#
-    
-    # RUTA PARA VER UN LIBRO Y LISTAR SUS CAPÍTULOS (CONSOLIDADA)
-from urllib.parse import unquote # Asegúrate de que esta importación esté
+# RUTA PARA VER UN LIBRO Y LISTAR SUS CAPÍTULOS (CONSOLIDADA)
+@app.route('/libro/<nombre_libro>')
+def ver_libro(nombre_libro):
+    # ### REVISADO: Decodificar el nombre del libro de la URL
+    nombre_libro_decodificado = unquote(nombre_libro)
+
+    # Obtener los datos del libro específico desde 'biblia_data'
+    libro_data = biblia.get('biblia_data', {}).get(nombre_libro_decodificado, None)
+
+    # --- INICIO DE LÍNEAS DE DEPURACIÓN PARA ver_libro ---
+    print(f"DEBUG (ver_libro): Nombre del libro recibido en la URL (original): '{nombre_libro}'")
+    print(f"DEBUG (ver_libro): Nombre del libro decodificado: '{nombre_libro_decodificado}'")
+    if 'biblia_data' in biblia:
+        nombres_de_libros_cargados = list(biblia['biblia_data'].keys())
+        print(f"DEBUG (ver_libro): Nombres de libros cargados en biblia.json: {nombres_de_libros_cargados}")
+        if nombre_libro_decodificado in nombres_de_libros_cargados:
+            print(f"DEBUG (ver_libro): ¡El libro '{nombre_libro_decodificado}' SÍ se encuentra entre los cargados!")
+        else:
+            print(f"DEBUG (ver_libro): El libro '{nombre_libro_decodificado}' NO se encuentra entre los cargados.")
+    else:
+        print("DEBUG (ver_libro): 'biblia_data' no está presente en el diccionario 'biblia'.")
+    # --- FIN DE LÍNEAS DE DEPURACIÓN PARA ver_libro ---
+
+    if libro_data:
+        capitulos = [cap for cap in libro_data.keys() if cap != 'info']
+        capitulos_ordenados = sorted(capitulos, key=int) # Asegura orden numérico
+
+        resumen = resumenes_libros.get(nombre_libro_decodificado, "Resumen no disponible.")
+
+        return render_template('ver_libro.html',
+                               libro_nombre=nombre_libro_decodificado,
+                               capitulos=capitulos_ordenados,
+                               resumen=resumen)
+    else:
+        # Devuelve un error 404 si el libro no existe en biblia_data
+        print(f"DEBUG (ver_libro): Libro '{nombre_libro_decodificado}' NO ENCONTRADO al final de la función.")
+        return render_template('error.html', mensaje=f"Lo siento, el libro '{nombre_libro_decodificado}' no fue encontrado.", titulo_error="Libro no Encontrado"), 404
+
+# RUTA PARA VER UN CAPÍTULO ESPECÍFICO DE UN LIBRO (esta ya la tienes, solo asegúrate que sea igual)
+@app.route('/libro/<nombre_libro>/capitulo/<int:num_capitulo>')
+def ver_capitulo(nombre_libro, num_capitulo):
+    # ... (Tu código actual para ver_capitulo, tal como lo revisamos la última vez, debería ir aquí) ...
+    # Asegúrate de que tenga las líneas DEBUG que te di para esta función y use nombre_libro_decodificado
 
 # RUTA PARA VER UN CAPÍTULO ESPECÍFICO DE UN LIBRO
 @app.route('/libro/<nombre_libro>/capitulo/<int:num_capitulo>')
