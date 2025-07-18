@@ -92,10 +92,7 @@ def lista_libros():
     libros_ordenados = sorted(nombres_libros)
     return render_template('libros.html', libros=libros_ordenados, resumenes_libros=resumenes_libros)
 
-# RUTA PARA VER UN LIBRO Y LISTAR SUS CAPÍTULOS (CONSOLIDADA)
-@app.route('/libro/<nombre_libro>')
-def ver_libro(nombre_libro):
-    libro_data = biblia.get('biblia_data', {}).get(nombre_libro, None)
+#
     
     # RUTA PARA VER UN LIBRO Y LISTAR SUS CAPÍTULOS (CONSOLIDADA)
 @app.route('/libro/<nombre_libro>')
