@@ -7,6 +7,68 @@ import re # Asegúrate de que esta también esté si la usas para la búsqueda
 
 app = Flask(__name__)
 
+# app.py
+
+# ... (tus importaciones existentes, incluyendo 'os', 'json')
+
+app = Flask(__name__)
+# ... (app.config['SECRET_KEY'], BASE_DIR, biblia, resumenes_libros loading)
+
+# ... (otras rutas existentes como '/', '/libros', '/buscar', '/favoritos')
+
+# **NUEVA RUTA: Para ver un libro y listar sus capítulos**
+@app.route('/libro/<libro_nombre>')
+def ver_libro(libro_nombre):
+    # Flask decodifica automáticamente los caracteres especiales como %20 (espacios)
+    # Por seguridad, puedes asegurarte de que el nombre del libro en la URL coincida con tus claves JSON.
+    # Una opción simple para URL con números es reemplazar %20 con espacio, si fuera necesario,
+    # aunque Flask suele manejarlo. Para este caso, asumiremos que Flask lo pasa bien.
+
+    if libro_nombre not in biblia:
+        # Si el libro no se encuentra en la Biblia cargada, muestra un mensaje de error.
+        # Es importante que el nombre en tu biblia.json sea EXACTO (ej. "1 Corintios").
+        return render_template('error.html', mensaje=f"Lo siento, el libro '{libro_nombre}' no fue encontrado."), 404
+
+    # Obtener el número de capítulos de ese libro
+    num_capitulos = len(biblia[libro_nombre])
+
+    # Crear una lista de números de capítulo para pasar a la plantilla
+    capitulos = range(1, num_capitulos + 1)
+
+    # Renderizar la plantilla 'ver_libro.html' para mostrar los capítulos
+    # Esta plantilla debe tener un bucle para mostrar enlaces a cada capítulo
+    return render_template('ver_libro.html',
+                           libro_nombre=libro_nombre,
+                           capitulos=capitulos)
+
+
+# **TU RUTA EXISTENTE: Para ver un capítulo específico de un libro**
+@app.route('/libro/<libro_nombre>/capitulo/<int:num_capitulo>')
+def ver_capitulo(libro_nombre, num_capitulo):
+    # Asegúrate de que este libro_nombre sea el mismo que se pasa a ver_libro
+    # Y que el num_capitulo sea válido.
+    
+    if libro_nombre not in biblia:
+        return render_template('error.html', mensaje=f"Libro '{libro_nombre}' no encontrado."), 404
+
+    # Validar que el número de capítulo esté dentro del rango existente para el libro
+    if num_capitulo <= 0 or num_capitulo > len(biblia[libro_nombre]):
+        return render_template('error.html', mensaje="Capítulo no válido o inexistente para este libro."), 404
+
+    # Obtener los versículos del capítulo
+    versiculos = biblia[libro_nombre][str(num_capitulo)]
+    
+    # Calcular el total de capítulos para la navegación (si tienes botones de siguiente/anterior capítulo)
+    total_capitulos = len(biblia[libro_nombre])
+
+    return render_template('ver_capitulo.html',
+                           libro_nombre=libro_nombre,
+                           num_capitulo=num_capitulo,
+                           versiculos=versiculos,
+                           total_capitulos=total_capitulos)
+
+
+
 # Ruta base para los archivos de datos
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
