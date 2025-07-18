@@ -4,55 +4,19 @@ import random
 import unicodedata
 import os
 import re
-from urllib.parse import unquote
+from urllib.parse import unquote # <--- ¡Solo aquí, al principio!
 
 # --- 1. Inicialización de la Aplicación Flask (¡SOLO UNA VEZ!) ---
 app = Flask(__name__)
 
-# --- 2. Configuraciones (opcional, pero buena práctica) ---
-# app.config['SECRET_KEY'] = 'tu_clave_secreta_aqui' # Descomenta y cambia por una clave fuerte si usas sesiones o formularios
-
-# --- 3. Definición de la ruta base para los archivos de datos ---
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-# --- 4. Carga de los archivos JSON (¡SOLO UNA VEZ!) ---
-# Cargar la Biblia completa con versículos
-try:
-    with open(os.path.join(BASE_DIR, 'biblia.json'), 'r', encoding='utf-8') as f:
-        biblia = json.load(f)
-    print("biblia.json cargado exitosamente.")
-    if 'biblia_data' in biblia:
-        print(f"Libros encontrados en biblia.json: {list(biblia['biblia_data'].keys())}")
-    else:
-        print("Advertencia: 'biblia_data' no encontrada como clave principal en biblia.json.")
-except FileNotFoundError:
-    print(f"Error: 'biblia.json' no encontrado en '{BASE_DIR}'. Asegúrate de que esté en la misma carpeta que 'app.py'.")
-    biblia = {} # Cargar un diccionario vacío para evitar errores posteriores
-except json.JSONDecodeError:
-    print("Error: 'biblia.json' contiene un JSON inválido. Revisa su formato.")
-    biblia = {}
-
-# Cargar los resúmenes de los libros
-try:
-    with open(os.path.join(BASE_DIR, 'resumen_libros.json'), 'r', encoding='utf-8') as f:
-        resumenes_libros = json.load(f)
-    print("resumen_libros.json cargado exitosamente.")
-except FileNotFoundError:
-    print(f"Error: 'resumen_libros.json' no encontrado en '{BASE_DIR}'. Asegúrate de que esté en la misma carpeta que 'app.py'.")
-    resumenes_libros = {}
-except json.JSONDecodeError:
-    print("Error: 'resumen_libros.json' contiene un JSON inválido. Revisa su formato.")
-    resumenes_libros = {}
+# ... (El resto de tu código de inicialización y carga de JSON es correcto) ...
 
 # --- 5. Función para normalizar texto (utilizada en la búsqueda) ---
 def normalize_text(text):
     if not isinstance(text, str):
         return ""
     text = text.lower()
-    # Normalizar para quitar acentos y otros caracteres diacríticos
     text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8')
-    # Puedes añadir más limpieza, por ejemplo, quitar puntuación si no la quieres en la búsqueda
-    # text = re.sub(r'[^\w\s]', '', text)
     return text
 
 # --- 6. Definición de todas las Rutas de la Aplicación ---
@@ -93,16 +57,12 @@ def lista_libros():
     libros_ordenados = sorted(nombres_libros)
     return render_template('libros.html', libros=libros_ordenados, resumenes_libros=resumenes_libros)
 
-# RUTA PARA VER UN LIBRO Y LISTAR SUS CAPÍTULOS (CONSOLIDADA)
+# RUTA PARA VER UN LIBRO Y LISTAR SUS CAPÍTULOS
 @app.route('/libro/<nombre_libro>')
 def ver_libro(nombre_libro):
-    # ### REVISADO: Decodificar el nombre del libro de la URL
     nombre_libro_decodificado = unquote(nombre_libro)
-
-    # Obtener los datos del libro específico desde 'biblia_data'
     libro_data = biblia.get('biblia_data', {}).get(nombre_libro_decodificado, None)
 
-    # --- INICIO DE LÍNEAS DE DEPURACIÓN PARA ver_libro ---
     print(f"DEBUG (ver_libro): Nombre del libro recibido en la URL (original): '{nombre_libro}'")
     print(f"DEBUG (ver_libro): Nombre del libro decodificado: '{nombre_libro_decodificado}'")
     if 'biblia_data' in biblia:
@@ -114,11 +74,10 @@ def ver_libro(nombre_libro):
             print(f"DEBUG (ver_libro): El libro '{nombre_libro_decodificado}' NO se encuentra entre los cargados.")
     else:
         print("DEBUG (ver_libro): 'biblia_data' no está presente en el diccionario 'biblia'.")
-    # --- FIN DE LÍNEAS DE DEPURACIÓN PARA ver_libro ---
 
     if libro_data:
         capitulos = [cap for cap in libro_data.keys() if cap != 'info']
-        capitulos_ordenados = sorted(capitulos, key=int) # Asegura orden numérico
+        capitulos_ordenados = sorted(capitulos, key=int)
 
         resumen = resumenes_libros.get(nombre_libro_decodificado, "Resumen no disponible.")
 
@@ -127,50 +86,32 @@ def ver_libro(nombre_libro):
                                capitulos=capitulos_ordenados,
                                resumen=resumen)
     else:
-        # Devuelve un error 404 si el libro no existe en biblia_data
         print(f"DEBUG (ver_libro): Libro '{nombre_libro_decodificado}' NO ENCONTRADO al final de la función.")
         return render_template('error.html', mensaje=f"Lo siento, el libro '{nombre_libro_decodificado}' no fue encontrado.", titulo_error="Libro no Encontrado"), 404
 
-# RUTA PARA VER UN CAPÍTULO ESPECÍFICO DE UN LIBRO (esta ya la tienes, solo asegúrate que sea igual)
+# RUTA PARA VER UN CAPÍTULO ESPECÍFICO DE UN LIBRO (¡Solo una vez!)
 @app.route('/libro/<nombre_libro>/capitulo/<int:num_capitulo>')
 def ver_capitulo(nombre_libro, num_capitulo):
-    # ... (Tu código actual para ver_capitulo, tal como lo revisamos la última vez, debería ir aquí) ...
-    # Asegúrate de que tenga las líneas DEBUG que te di para esta función y use nombre_libro_decodificado
-
-# RUTA PARA VER UN CAPÍTULO ESPECÍFICO DE UN LIBRO
-@app.route('/libro/<nombre_libro>/capitulo/<int:num_capitulo>')
-def ver_capitulo(nombre_libro, num_capitulo):
-    # ### NUEVO / REVISADO ###: Decodificar el nombre del libro de la URL
     nombre_libro_decodificado = unquote(nombre_libro)
-
-    # Obtener los datos del libro
-    # ### REVISADO ###: Usar el nombre decodificado
     libro_data = biblia.get('biblia_data', {}).get(nombre_libro_decodificado, None)
 
-    # --- INICIO DE LÍNEAS DE DEPURACIÓN (AÑADIDAS/REVISADAS) ---
     print(f"DEBUG: Accediendo a: '{nombre_libro_decodificado}' Capítulo: '{num_capitulo}'")
-    print(f"DEBUG: Tipo de num_capitulo recibido por Flask: {type(num_capitulo)}") # ### NUEVO DEBUG ###
+    print(f"DEBUG: Tipo de num_capitulo recibido por Flask: {type(num_capitulo)}")
 
-    if 'biblia_data' not in biblia: # ### NUEVO DEBUG ###
+    if 'biblia_data' not in biblia:
         print("DEBUG: 'biblia_data' no está presente en el diccionario 'biblia' al inicio de ver_capitulo.")
 
     if libro_data:
         print(f"DEBUG: Libro '{nombre_libro_decodificado}' ENCONTRADO.")
-        # ### NUEVO DEBUG ###: Mostrar las claves de capítulos disponibles para el libro
         print(f"DEBUG: Claves de capítulos disponibles para '{nombre_libro_decodificado}': {list(libro_data.keys())}")
 
-        # Obtener los datos del capítulo
-        # ### CLAVE ###: Convertimos num_capitulo a string porque las claves JSON son comúnmente strings ("1", "2")
-        capitulo_data = libro_data.get(str(num_capitulo), None) # Convertir int a string para la búsqueda
-        print(f"DEBUG: Intentando buscar capítulo con clave: '{str(num_capitulo)}'") # ### NUEVO DEBUG ###
+        capitulo_data = libro_data.get(str(num_capitulo), None)
+        print(f"DEBUG: Intentando buscar capítulo con clave: '{str(num_capitulo)}'")
 
         if capitulo_data:
             print(f"DEBUG: Capítulo '{num_capitulo}' ENCONTRADO para '{nombre_libro_decodificado}'.")
-            # ### NUEVO DEBUG ###: Esto imprimirá las claves de los versículos (sus números)
             print(f"DEBUG: Claves de versículos en el capítulo: {list(capitulo_data.keys())}")
 
-            # Ordenar los versículos por número
-            # ### CLAVE ###: Convertimos la clave del versículo (item[0]) a int para asegurar el orden numérico
             versiculos_ordenados = sorted(capitulo_data.items(), key=lambda item: int(item[0]))
 
             return render_template('ver_capitulo.html',
