@@ -98,33 +98,40 @@ def lista_libros():
     # RUTA PARA VER UN LIBRO Y LISTAR SUS CAPÍTULOS (CONSOLIDADA)
 from urllib.parse import unquote # Asegúrate de que esta importación esté
 
+# RUTA PARA VER UN CAPÍTULO ESPECÍFICO DE UN LIBRO
 @app.route('/libro/<nombre_libro>/capitulo/<int:num_capitulo>')
 def ver_capitulo(nombre_libro, num_capitulo):
+    # ### NUEVO / REVISADO ###: Decodificar el nombre del libro de la URL
     nombre_libro_decodificado = unquote(nombre_libro)
 
     # Obtener los datos del libro
+    # ### REVISADO ###: Usar el nombre decodificado
     libro_data = biblia.get('biblia_data', {}).get(nombre_libro_decodificado, None)
 
-    if libro_data:
-        # Obtener los datos del capítulo
-        # Aquí es donde podría estar el problema si 'num_capitulo' no coincide
-        # con la clave exacta en tu biblia.json (ej. '1' como string vs 1 como int)
-        capitulo_data = libro_data.get(str(num_capitulo), None) # O podrías necesitar int(num_capitulo)
+    # --- INICIO DE LÍNEAS DE DEPURACIÓN (AÑADIDAS/REVISADAS) ---
+    print(f"DEBUG: Accediendo a: '{nombre_libro_decodificado}' Capítulo: '{num_capitulo}'")
+    print(f"DEBUG: Tipo de num_capitulo recibido por Flask: {type(num_capitulo)}") # ### NUEVO DEBUG ###
 
-        # --- AÑADE AQUÍ MÁS LÍNEAS DE DEBUG ---
-        print(f"DEBUG: Accediendo a: '{nombre_libro_decodificado}' Capítulo: '{num_capitulo}'")
+    if 'biblia_data' not in biblia: # ### NUEVO DEBUG ###
+        print("DEBUG: 'biblia_data' no está presente en el diccionario 'biblia' al inicio de ver_capitulo.")
+
+    if libro_data:
+        print(f"DEBUG: Libro '{nombre_libro_decodificado}' ENCONTRADO.")
+        # ### NUEVO DEBUG ###: Mostrar las claves de capítulos disponibles para el libro
+        print(f"DEBUG: Claves de capítulos disponibles para '{nombre_libro_decodificado}': {list(libro_data.keys())}")
+
+        # Obtener los datos del capítulo
+        # ### CLAVE ###: Convertimos num_capitulo a string porque las claves JSON son comúnmente strings ("1", "2")
+        capitulo_data = libro_data.get(str(num_capitulo), None) # Convertir int a string para la búsqueda
+        print(f"DEBUG: Intentando buscar capítulo con clave: '{str(num_capitulo)}'") # ### NUEVO DEBUG ###
+
         if capitulo_data:
             print(f"DEBUG: Capítulo '{num_capitulo}' ENCONTRADO para '{nombre_libro_decodificado}'.")
-            # Esto imprimirá las claves de los versículos (sus números)
+            # ### NUEVO DEBUG ###: Esto imprimirá las claves de los versículos (sus números)
             print(f"DEBUG: Claves de versículos en el capítulo: {list(capitulo_data.keys())}")
-        else:
-            print(f"DEBUG: Capítulo '{num_capitulo}' NO ENCONTRADO para '{nombre_libro_decodificado}'.")
-            # Esto imprimirá las claves de los capítulos que sí se encontraron para el libro
-            print(f"DEBUG: Claves de capítulos disponibles para '{nombre_libro_decodificado}': {list(libro_data.keys())}")
-        # --- FIN DE LÍNEAS DE DEBUG ---
 
-        if capitulo_data:
             # Ordenar los versículos por número
+            # ### CLAVE ###: Convertimos la clave del versículo (item[0]) a int para asegurar el orden numérico
             versiculos_ordenados = sorted(capitulo_data.items(), key=lambda item: int(item[0]))
 
             return render_template('ver_capitulo.html',
@@ -132,9 +139,12 @@ def ver_capitulo(nombre_libro, num_capitulo):
                                    num_capitulo=num_capitulo,
                                    versiculos=versiculos_ordenados)
         else:
-            return render_template('error.html', mensaje=f"Capítulo {num_capitulo} no encontrado para el libro {nombre_libro_decodificado}."), 404
+            print(f"DEBUG: Capítulo '{num_capitulo}' NO ENCONTRADO para '{nombre_libro_decodificado}'.")
+            return render_template('error.html', mensaje=f"Capítulo {num_capitulo} no encontrado para el libro {nombre_libro_decodificado}.", titulo_error="Capítulo no Encontrado"), 404
     else:
-        return render_template('error.html', mensaje=f"Lo siento, el libro '{nombre_libro_decodificado}' no fue encontrado."), 404
+        print(f"DEBUG: Libro '{nombre_libro_decodificado}' NO ENCONTRADO al inicio de ver_capitulo.")
+        return render_template('error.html', mensaje=f"Lo siento, el libro '{nombre_libro_decodificado}' no fue encontrado.", titulo_error="Libro no Encontrado"), 404
+    
 @app.route('/buscar', methods=['GET'])
 def buscar():
     query = request.args.get('q', '').strip()
