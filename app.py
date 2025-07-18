@@ -96,45 +96,45 @@ def lista_libros():
 #
     
     # RUTA PARA VER UN LIBRO Y LISTAR SUS CAPÍTULOS (CONSOLIDADA)
-@app.route('/libro/<nombre_libro>')
-def ver_libro(nombre_libro):
-    # *** AÑADE ESTA LÍNEA PARA DECODIFICAR EL NOMBRE DEL LIBRO ***
+from urllib.parse import unquote # Asegúrate de que esta importación esté
+
+@app.route('/libro/<nombre_libro>/capitulo/<int:num_capitulo>')
+def ver_capitulo(nombre_libro, num_capitulo):
     nombre_libro_decodificado = unquote(nombre_libro)
 
-    # Obtener los datos del libro específico desde 'biblia_data'
-    # *** USA EL NOMBRE DECODIFICADO AQUÍ ***
+    # Obtener los datos del libro
     libro_data = biblia.get('biblia_data', {}).get(nombre_libro_decodificado, None)
 
-    # --- INICIO DE LÍNEAS DE DEPURACIÓN ---
-    # *** ACTUALIZA TUS PRINTS PARA MOSTRAR EL NOMBRE DECODIFICADO ***
-    print(f"DEBUG: Nombre del libro recibido en la URL (original): '{nombre_libro}'")
-    print(f"DEBUG: Nombre del libro decodificado: '{nombre_libro_decodificado}'")
-    if 'biblia_data' in biblia:
-        nombres_de_libros_cargados = list(biblia['biblia_data'].keys())
-        print(f"DEBUG: Nombres de libros cargados en biblia.json: {nombres_de_libros_cargados}")
-        # *** USA EL NOMBRE DECODIFICADO PARA LA COMPARACIÓN ***
-        if nombre_libro_decodificado in nombres_de_libros_cargados:
-            print(f"DEBUG: ¡El libro '{nombre_libro_decodificado}' SÍ se encuentra entre los cargados!")
-        else:
-            print(f"DEBUG: El libro '{nombre_libro_decodificado}' NO se encuentra entre los cargados.")
-    else:
-        print("DEBUG: 'biblia_data' no está presente en el diccionario 'biblia'.")
-    # --- FIN DE LÍNEAS DE DEPURACIÓN ---
-
     if libro_data:
-        capitulos = [cap for cap in libro_data.keys() if cap != 'info']
-        capitulos_ordenados = sorted(capitulos, key=int)
+        # Obtener los datos del capítulo
+        # Aquí es donde podría estar el problema si 'num_capitulo' no coincide
+        # con la clave exacta en tu biblia.json (ej. '1' como string vs 1 como int)
+        capitulo_data = libro_data.get(str(num_capitulo), None) # O podrías necesitar int(num_capitulo)
 
-        resumen = resumenes_libros.get(nombre_libro_decodificado, "Resumen no disponible.") # *** USA EL NOMBRE DECODIFICADO AQUÍ ***
+        # --- AÑADE AQUÍ MÁS LÍNEAS DE DEBUG ---
+        print(f"DEBUG: Accediendo a: '{nombre_libro_decodificado}' Capítulo: '{num_capitulo}'")
+        if capitulo_data:
+            print(f"DEBUG: Capítulo '{num_capitulo}' ENCONTRADO para '{nombre_libro_decodificado}'.")
+            # Esto imprimirá las claves de los versículos (sus números)
+            print(f"DEBUG: Claves de versículos en el capítulo: {list(capitulo_data.keys())}")
+        else:
+            print(f"DEBUG: Capítulo '{num_capitulo}' NO ENCONTRADO para '{nombre_libro_decodificado}'.")
+            # Esto imprimirá las claves de los capítulos que sí se encontraron para el libro
+            print(f"DEBUG: Claves de capítulos disponibles para '{nombre_libro_decodificado}': {list(libro_data.keys())}")
+        # --- FIN DE LÍNEAS DE DEBUG ---
 
-        return render_template('ver_libro.html',
-                               libro_nombre=nombre_libro_decodificado, # *** PASA EL NOMBRE DECODIFICADO A LA PLANTILLA ***
-                               capitulos=capitulos_ordenados,
-                               resumen=resumen)
+        if capitulo_data:
+            # Ordenar los versículos por número
+            versiculos_ordenados = sorted(capitulo_data.items(), key=lambda item: int(item[0]))
+
+            return render_template('ver_capitulo.html',
+                                   libro_nombre=nombre_libro_decodificado,
+                                   num_capitulo=num_capitulo,
+                                   versiculos=versiculos_ordenados)
+        else:
+            return render_template('error.html', mensaje=f"Capítulo {num_capitulo} no encontrado para el libro {nombre_libro_decodificado}."), 404
     else:
-        # Devuelve un error 404 si el libro no existe en biblia_data
-        return render_template('error.html', mensaje=f"Lo siento, el libro '{nombre_libro_decodificado}' no fue encontrado."), 404 # *** USA EL NOMBRE DECODIFICADO AQUÍ ***
-
+        return render_template('error.html', mensaje=f"Lo siento, el libro '{nombre_libro_decodificado}' no fue encontrado."), 404
 @app.route('/buscar', methods=['GET'])
 def buscar():
     query = request.args.get('q', '').strip()
