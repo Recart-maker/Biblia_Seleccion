@@ -4,25 +4,62 @@ import random
 import unicodedata
 import os
 import re
-from urllib.parse import unquote # <--- ¡Solo aquí, al principio!
+from urllib.parse import unquote # Importación de unquote una sola vez
 
 # --- 1. Inicialización de la Aplicación Flask (¡SOLO UNA VEZ!) ---
 app = Flask(__name__)
 
-# ... (El resto de tu código de inicialización y carga de JSON es correcto) ...
+# --- 2. Configuraciones (opcional, pero buena práctica) ---
+# app.config['SECRET_KEY'] = 'tu_clave_secreta_aqui' # Descomenta y cambia por una clave fuerte si usas sesiones o formularios
+
+# --- 3. Definición de la ruta base para los archivos de datos ---
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# --- 4. Carga de los archivos JSON (¡SOLO UNA VEZ Y ANTES DE LAS RUTAS!) ---
+# Cargar la Biblia completa con versículos
+try:
+    with open(os.path.join(BASE_DIR, 'biblia.json'), 'r', encoding='utf-8') as f:
+        biblia = json.load(f)
+    print("biblia.json cargado exitosamente.")
+    if 'biblia_data' in biblia:
+        print(f"Libros encontrados en biblia.json: {list(biblia['biblia_data'].keys())}")
+    else:
+        print("Advertencia: 'biblia_data' no encontrada como clave principal en biblia.json.")
+except FileNotFoundError:
+    print(f"Error: 'biblia.json' no encontrado en '{BASE_DIR}'. Asegúrate de que esté en la misma carpeta que 'app.py'.")
+    biblia = {} # Cargar un diccionario vacío para evitar errores posteriores
+except json.JSONDecodeError:
+    print("Error: 'biblia.json' contiene un JSON inválido. Revisa su formato.")
+    biblia = {}
+
+# Cargar los resúmenes de los libros
+try:
+    with open(os.path.join(BASE_DIR, 'resumen_libros.json'), 'r', encoding='utf-8') as f:
+        resumenes_libros = json.load(f)
+    print("resumen_libros.json cargado exitosamente.")
+except FileNotFoundError:
+    print(f"Error: 'resumen_libros.json' no encontrado en '{BASE_DIR}'. Asegúrate de que esté en la misma carpeta que 'app.py'.")
+    resumenes_libros = {}
+except json.JSONDecodeError:
+    print("Error: 'resumen_libros.json' contiene un JSON inválido. Revisa su formato.")
+    resumenes_libros = {}
 
 # --- 5. Función para normalizar texto (utilizada en la búsqueda) ---
 def normalize_text(text):
     if not isinstance(text, str):
         return ""
     text = text.lower()
+    # Normalizar para quitar acentos y otros caracteres diacríticos
     text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8')
+    # Puedes añadir más limpieza, por ejemplo, quitar puntuación si no la quieres en la búsqueda
+    # text = re.sub(r'[^\w\s]', '', text)
     return text
 
 # --- 6. Definición de todas las Rutas de la Aplicación ---
 
 @app.route('/')
 def index():
+    print("DEBUG (index): Entrando a la función index.") # Debug
     versiculo_aleatorio_texto = "¡Bienvenido a tu Biblia App! Navega para empezar."
     versiculo_aleatorio_referencia = ""
 
@@ -44,11 +81,12 @@ def index():
                     versiculo_elegido_num = random.choice(versiculos_nums)
                     versiculo_aleatorio_texto = versiculos_capitulo.get(versiculo_elegido_num)
                     versiculo_aleatorio_referencia = f"{libro_elegido_nombre} {capitulo_elegido_num}:{versiculo_elegido_num}"
-
+    
+    print("DEBUG (index): Intentando renderizar index.html.") # Debug
     return render_template('index.html',
                            portada_versiculo=versiculo_aleatorio_texto,
                            portada_referencia=versiculo_aleatorio_referencia,
-                           libros=biblia_data_contenido.keys(),
+                           libros=biblia_data_contenido.keys(), # Correcto: biblia_data_contenido ya es un dict
                            resumenes_libros=resumenes_libros)
 
 @app.route('/libros')
