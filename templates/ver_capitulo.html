@@ -10,112 +10,59 @@
     <header>
         <h1>Mi Biblia App</h1>
         <nav>
-    <ul>
-        <li><a href="/">Inicio</a></li>
-        <li><a href="/libros">Libros</a></li>
-        <li><a href="/favoritos">Favoritos</a></li>
-        <li>
-            <form action="/buscar" method="get" class="search-form-header">
-                <input type="search" name="q" placeholder="Buscar en la Biblia...">
-                <button type="submit">Buscar</button>
-            </form>
-        </li>
-    </ul>
-</nav>
+            <ul>
+                <li><a href="/">Inicio</a></li>
+                <li><a href="/libros">Libros</a></li>
+                <li><a href="/favoritos">Favoritos</a></li>
+                <li>
+                    <form action="/buscar" method="get" class="search-form-header">
+                        <input type="search" name="q" placeholder="Buscar en la Biblia...">
+                        <button type="submit">Buscar</button>
+                    </form>
+                </li>
+            </ul>
+        </nav>
     </header>
 
     <main>
         <section class="contenido-capitulo">
-            <h2>{{ libro_nombre }} Capítulo {{ num_capitulo }}</h2>
+            <h2>{{ libro_nombre }} - Capítulo {{ num_capitulo }}</h2>
 
-            {# ... Tu código HTML existente hasta donde muestra el título del capítulo ... #}
-
-<div class="navigation-bar">
-    {% if capitulo_anterior %}
-        <a href="{{ url_for('ver_capitulo', nombre_libro=libro_nombre, num_capitulo=capitulo_anterior) }}" class="nav-button">&laquo; Anterior</a>
-    {% else %}
-        <span class="nav-button disabled">&laquo; Anterior</span>
-    {% endif %}
-
-    <div class="chapter-selector-container">
-        <select onchange="window.location.href=this.value;">
-            {% for cap in todos_los_capitulos %}
-                <option value="{{ url_for('ver_capitulo', nombre_libro=libro_nombre, num_capitulo=cap) }}" {% if cap == num_capitulo %}selected{% endif %}>
-                    Capítulo {{ cap }}
-                </option>
-            {% endfor %}
-        </select>
-    </div>
-
-    {% if capitulo_siguiente %}
-        <a href="{{ url_for('ver_capitulo', nombre_libro=libro_nombre, num_capitulo=capitulo_siguiente) }}" class="nav-button">Siguiente &raquo;</a>
-    {% else %}
-        <span class="nav-button disabled">Siguiente &raquo;</span>
-    {% endif %}
-</div>
-
-<h2>{{ libro_nombre }} - Capítulo {{ num_capitulo }}</h2>
-
-{# ... El resto de tu código para mostrar los versículos ... #}
-
-{# Puedes duplicar la barra de navegación al final de la página si lo deseas #}
-<div class="navigation-bar">
-    {% if capitulo_anterior %}
-        <a href="{{ url_for('ver_capitulo', nombre_libro=libro_nombre, num_capitulo=capitulo_anterior) }}" class="nav-button">&laquo; Anterior</a>
-    {% else %}
-        <span class="nav-button disabled">&laquo; Anterior</span>
-    {% endif %}
-
-    <div class="chapter-selector-container">
-        <select onchange="window.location.href=this.value;">
-            {% for cap in todos_los_capitulos %}
-                <option value="{{ url_for('ver_capitulo', nombre_libro=libro_nombre, num_capitulo=cap) }}" {% if cap == num_capitulo %}selected{% endif %}>
-                    Capítulo {{ cap }}
-                </option>
-            {% endfor %}
-        </select>
-    </div>
-
-    {% if capitulo_siguiente %}
-        <a href="{{ url_for('ver_capitulo', nombre_libro=libro_nombre, num_capitulo=capitulo_siguiente) }}" class="nav-button">Siguiente &raquo;</a>
-    {% else %}
-        <span class="nav-button disabled">Siguiente &raquo;</span>
-    {% endif %}
-</div>
-
-            <div class="navegacion-capitulos">
+            <div class="navigation-bar">
                 {% if capitulo_anterior %}
-                    <a href="/libro/{{ libro_nombre }}/capitulo/{{ capitulo_anterior }}" class="btn-navegacion anterior">Capítulo {{ capitulo_anterior }}</a>
+                    <a href="{{ url_for('ver_capitulo', nombre_libro=libro_nombre, num_capitulo=capitulo_anterior) }}" class="nav-button">&laquo; Capítulo {{ capitulo_anterior }}</a>
                 {% else %}
-                    <span class="btn-navegacion deshabilitado">Anterior</span>
+                    <span class="nav-button disabled">&laquo; Inicio</span>
                 {% endif %}
 
-                <select onchange="window.location.href = this.value" class="selector-capitulo">
-                    {% for cap_total in total_capitulos %}
-                        <option value="/libro/{{ libro_nombre }}/capitulo/{{ cap_total }}" {% if cap_total == num_capitulo|string %}selected{% endif %}>
-                            Capítulo {{ cap_total }}
-                        </option>
-                    {% endfor %}
-                </select>
+                <div class="chapter-selector-container">
+                    <select onchange="window.location.href=this.value;">
+                        {% for cap in todos_los_capitulos %}
+                            <option value="{{ url_for('ver_capitulo', nombre_libro=libro_nombre, num_capitulo=cap) }}" {% if cap == num_capitulo %}selected{% endif %}>
+                                Capítulo {{ cap }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
 
                 {% if capitulo_siguiente %}
-                    <a href="/libro/{{ libro_nombre }}/capitulo/{{ capitulo_siguiente }}" class="btn-navegacion siguiente">Capítulo {{ capitulo_siguiente }}</a>
+                    <a href="{{ url_for('ver_capitulo', nombre_libro=libro_nombre, num_capitulo=capitulo_siguiente) }}" class="nav-button">Capítulo {{ capitulo_siguiente }} &raquo;</a>
                 {% else %}
-                    <span class="btn-navegacion deshabilitado">Siguiente</span>
+                    <span class="nav-button disabled">Fin &raquo;</span>
                 {% endif %}
             </div>
 
-          <div class="versiculos">
+            <div class="versiculos">
                 {% for num_versiculo, texto_versiculo in versiculos %}
-        <p class="versiculo-item"
-           data-libro="{{ libro_nombre }}"
-           data-capitulo="{{ num_capitulo }}"
-           data-versiculo="{{ num_versiculo }}">
-            <strong>{{ num_versiculo }}.</strong> {{ texto_versiculo }}
-            <span class="favorite-button" role="button" aria-label="Añadir a favoritos">⭐</span>
-        </p>
-    {% endfor %}
-</div>
+                    <p class="versiculo-item"
+                       data-libro="{{ libro_nombre }}"
+                       data-capitulo="{{ num_capitulo }}"
+                       data-versiculo="{{ num_versiculo }}">
+                        <strong>{{ num_versiculo }}.</strong> {{ texto_versiculo }}
+                        <span class="favorite-button" role="button" aria-label="Añadir a favoritos">⭐</span>
+                    </p>
+                {% endfor %}
+            </div>
         </section>
     </main>
 
