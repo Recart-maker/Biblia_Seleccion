@@ -28,6 +28,61 @@
         <section class="contenido-capitulo">
             <h2>{{ libro_nombre }} Capítulo {{ num_capitulo }}</h2>
 
+            {# ... Tu código HTML existente hasta donde muestra el título del capítulo ... #}
+
+<div class="navigation-bar">
+    {% if capitulo_anterior %}
+        <a href="{{ url_for('ver_capitulo', nombre_libro=libro_nombre, num_capitulo=capitulo_anterior) }}" class="nav-button">&laquo; Anterior</a>
+    {% else %}
+        <span class="nav-button disabled">&laquo; Anterior</span>
+    {% endif %}
+
+    <div class="chapter-selector-container">
+        <select onchange="window.location.href=this.value;">
+            {% for cap in todos_los_capitulos %}
+                <option value="{{ url_for('ver_capitulo', nombre_libro=libro_nombre, num_capitulo=cap) }}" {% if cap == num_capitulo %}selected{% endif %}>
+                    Capítulo {{ cap }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    {% if capitulo_siguiente %}
+        <a href="{{ url_for('ver_capitulo', nombre_libro=libro_nombre, num_capitulo=capitulo_siguiente) }}" class="nav-button">Siguiente &raquo;</a>
+    {% else %}
+        <span class="nav-button disabled">Siguiente &raquo;</span>
+    {% endif %}
+</div>
+
+<h2>{{ libro_nombre }} - Capítulo {{ num_capitulo }}</h2>
+
+{# ... El resto de tu código para mostrar los versículos ... #}
+
+{# Puedes duplicar la barra de navegación al final de la página si lo deseas #}
+<div class="navigation-bar">
+    {% if capitulo_anterior %}
+        <a href="{{ url_for('ver_capitulo', nombre_libro=libro_nombre, num_capitulo=capitulo_anterior) }}" class="nav-button">&laquo; Anterior</a>
+    {% else %}
+        <span class="nav-button disabled">&laquo; Anterior</span>
+    {% endif %}
+
+    <div class="chapter-selector-container">
+        <select onchange="window.location.href=this.value;">
+            {% for cap in todos_los_capitulos %}
+                <option value="{{ url_for('ver_capitulo', nombre_libro=libro_nombre, num_capitulo=cap) }}" {% if cap == num_capitulo %}selected{% endif %}>
+                    Capítulo {{ cap }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    {% if capitulo_siguiente %}
+        <a href="{{ url_for('ver_capitulo', nombre_libro=libro_nombre, num_capitulo=capitulo_siguiente) }}" class="nav-button">Siguiente &raquo;</a>
+    {% else %}
+        <span class="nav-button disabled">Siguiente &raquo;</span>
+    {% endif %}
+</div>
+
             <div class="navegacion-capitulos">
                 {% if capitulo_anterior %}
                     <a href="/libro/{{ libro_nombre }}/capitulo/{{ capitulo_anterior }}" class="btn-navegacion anterior">Capítulo {{ capitulo_anterior }}</a>

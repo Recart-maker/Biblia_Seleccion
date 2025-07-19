@@ -133,36 +133,31 @@ def ver_capitulo(nombre_libro, num_capitulo):
     nombre_libro_decodificado = unquote(nombre_libro)
     libro_data = biblia.get('biblia_data', {}).get(nombre_libro_decodificado, None)
 
-    print(f"DEBUG: Accediendo a: '{nombre_libro_decodificado}' Capítulo: '{num_capitulo}'")
-    print(f"DEBUG: Tipo de num_capitulo recibido por Flask: {type(num_capitulo)}")
-
-    if 'biblia_data' not in biblia:
-        print("DEBUG: 'biblia_data' no está presente en el diccionario 'biblia' al inicio de ver_capitulo.")
-
     if libro_data:
-        print(f"DEBUG: Libro '{nombre_libro_decodificado}' ENCONTRADO.")
-        print(f"DEBUG: Claves de capítulos disponibles para '{nombre_libro_decodificado}': {list(libro_data.keys())}")
+        capitulos_disponibles = [int(c) for c in libro_data.keys() if c != 'info']
+        capitulos_ordenados = sorted(capitulos_disponibles)
 
         capitulo_data = libro_data.get(str(num_capitulo), None)
-        print(f"DEBUG: Intentando buscar capítulo con clave: '{str(num_capitulo)}'")
 
         if capitulo_data:
-            print(f"DEBUG: Capítulo '{num_capitulo}' ENCONTRADO para '{nombre_libro_decodificado}'.")
-            print(f"DEBUG: Claves de versículos en el capítulo: {list(capitulo_data.keys())}")
-
             versiculos_ordenados = sorted(capitulo_data.items(), key=lambda item: int(item[0]))
+
+            # Lógica para capítulo anterior y siguiente
+            indice_actual = capitulos_ordenados.index(num_capitulo)
+            capitulo_anterior = capitulos_ordenados[indice_actual - 1] if indice_actual > 0 else None
+            capitulo_siguiente = capitulos_ordenados[indice_actual + 1] if indice_actual < len(capitulos_ordenados) - 1 else None
 
             return render_template('ver_capitulo.html',
                                    libro_nombre=nombre_libro_decodificado,
                                    num_capitulo=num_capitulo,
-                                   versiculos=versiculos_ordenados)
+                                   versiculos=versiculos_ordenados,
+                                   capitulo_anterior=capitulo_anterior,
+                                   capitulo_siguiente=capitulo_siguiente,
+                                   todos_los_capitulos=capitulos_ordenados) # Nueva variable
         else:
-            print(f"DEBUG: Capítulo '{num_capitulo}' NO ENCONTRADO para '{nombre_libro_decodificado}'.")
             return render_template('error.html', mensaje=f"Capítulo {num_capitulo} no encontrado para el libro {nombre_libro_decodificado}.", titulo_error="Capítulo no Encontrado"), 404
     else:
-        print(f"DEBUG: Libro '{nombre_libro_decodificado}' NO ENCONTRADO al inicio de ver_capitulo.")
         return render_template('error.html', mensaje=f"Lo siento, el libro '{nombre_libro_decodificado}' no fue encontrado.", titulo_error="Libro no Encontrado"), 404
-    
 @app.route('/buscar', methods=['GET'])
 def buscar():
     query = request.args.get('q', '').strip()

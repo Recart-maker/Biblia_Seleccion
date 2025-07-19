@@ -566,4 +566,77 @@ footer {
     background-color: #c0392b;
 }
 
+/* Estilos para la barra de navegación de capítulos */
+.navigation-bar {
+    display: flex; /* Usa flexbox para alinear elementos en una fila */
+    justify-content: space-between; /* Espacia los elementos a los extremos y el centro */
+    align-items: center; /* Alinea verticalmente los elementos al centro */
+    margin: 20px 0; /* Espacio arriba y abajo de la barra de navegación */
+    padding: 10px;
+    background-color: #f8f8f8; /* Color de fondo suave */
+    border: 1px solid #eee;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.nav-button {
+    text-decoration: none; /* Quita el subrayado predeterminado de los enlaces */
+    padding: 8px 15px;
+    background-color: #007bff; /* Color azul para los botones activos */
+    color: white;
+    border-radius: 4px;
+    transition: background-color 0.3s ease; /* Transición suave para el hover */
+    white-space: nowrap; /* Evita que el texto se rompa en varias líneas */
+}
+
+.nav-button:hover {
+    background-color: #0056b3; /* Color más oscuro al pasar el ratón */
+}
+
+.nav-button.disabled {
+    background-color: #cccccc; /* Color gris para botones deshabilitados */
+    cursor: not-allowed; /* Cambia el cursor para indicar que no se puede hacer clic */
+    color: #666666;
+}
+
+/* Contenedor del selector de capítulo (para el <select>) */
+.chapter-selector-container {
+    flex-grow: 1; /* Permite que el contenedor del selector ocupe el espacio restante */
+    text-align: center; /* Centra el selector dentro de su contenedor */
+    margin: 0 15px; /* Margen a los lados para separar de los botones */
+}
+
+.chapter-selector-container select {
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    cursor: pointer;
+    background-color: #fff;
+    width: auto; /* Ajusta el ancho automáticamente según el contenido */
+    max-width: 180px; /* Limita el ancho máximo para pantallas más pequeñas */
+}
+
+/* Media queries para pantallas más pequeñas (opcional, pero mejora la responsividad) */
+@media (max-width: 600px) {
+    .navigation-bar {
+        flex-wrap: wrap; /* Permite que los elementos se envuelvan en varias líneas */
+        justify-content: center; /* Centra los elementos cuando se envuelven */
+    }
+
+    .nav-button {
+        margin: 5px; /* Espacio entre botones en pantallas pequeñas */
+    }
+
+    .chapter-selector-container {
+        margin-top: 10px; /* Espacio superior para el selector cuando está en una nueva línea */
+        width: 100%; /* Ocupa todo el ancho disponible */
+        order: 3; /* Asegura que el selector aparezca al final si se envuelve */
+    }
+
+    .chapter-selector-container select {
+        width: 80%; /* Hace el selector más ancho en móviles */
+    }
+}
+
 /* Puedes añadir más estilos si es necesario */
