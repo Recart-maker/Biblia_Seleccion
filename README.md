@@ -1,4 +1,4 @@
-# 📖 Mi Biblia App
+# 📖 Biblia Seleccion
 
 Una aplicación web interactiva desarrollada con Flask que permite a los usuarios leer la Biblia, buscar versículos, guardar favoritos y compartir pasajes.
 
